@@ -8,9 +8,18 @@ const express = require('express');
 const app = express();
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const cors = require('cors');
 
 // middleware to run on all requests
+// express
 app.use(express.json());
+
+// allow origin for frontend
+app.use(cors({
+  origin: 'http://localhost:3000', // Allow your frontend
+  credentials: true
+}));
+app.use(cors());
 
 // healt check pings
 app.get('/health', (req, res) => {
