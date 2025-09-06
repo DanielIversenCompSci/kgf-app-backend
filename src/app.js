@@ -26,8 +26,10 @@ app.get('/health', (req, res) => {
     res.json({ status: "server is alive :)"});
 });
 
+// API ROUTES
 // mount api routes - abstraction list of all routers
 app.use('/api/documents', require('./routes/documents'));
+app.use('/api/news', require('./routes/news'));
 
 // swagger config start
 // swagger ui @ localhost:xxxx/api-docs
