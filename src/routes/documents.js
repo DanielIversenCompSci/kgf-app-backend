@@ -17,7 +17,7 @@ const pool = require('../config/database');
  */
 router.get('/', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM documents_page');
+        const result = await pool.query('SELECT * FROM documents_page ORDER BY date DESC');
         res.json(result.rows);
     } catch (error) {
         console.error('HTTP GET /api/documents error:', error);

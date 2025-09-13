@@ -401,6 +401,43 @@ module.exports = router;
 
 ---
 
+## 🔐 Auth Endpoints
+
+Base path: `/api/auth`
+
+### POST `/api/auth/register`
+- Body: `{ email: string, password: string, name?: string }`
+- Returns: `{ user: { id, email, name, role, created_at }, token }`
+
+Example (success 201):
+
+```json
+{
+  "user": {"id":1,"email":"user@example.com","name":"User","role":"user","created_at":"2025-09-09T12:00:00Z"},
+  "token": "<JWT>"
+}
+```
+
+Errors: 400 validation, 409 email in use
+
+### POST `/api/auth/login`
+- Body: `{ email: string, password: string }`
+- Returns: `{ user: { id, email, name, role }, token }`
+
+Errors: 400 validation, 401 invalid credentials
+
+### GET `/api/auth/me`
+- Header: `Authorization: Bearer <JWT>`
+- Returns: `{ user: { id, email, name, role, created_at } }`
+- Errors: 401 unauthorized
+
+Notes:
+- Passwords are stored as bcrypt hashes only (never plaintext).
+- Emails are normalized to lowercase.
+- JWT secret and bcrypt rounds configured via `.env`.
+
+---
+
 ## 🧠 **Memory Tricks**
 
 - **CRUD** = **C**reate **R**ead **U**pdate **D**elete
