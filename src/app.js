@@ -16,14 +16,23 @@ const helmet = require('helmet');
 app.use(express.json());
 app.use(helmet());
 
-// allow origin for frontend
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:3000';
+const allowlist = [
+  process.env.FRONTEND_ORIGIN,        // https://klintehuse.dk
+  process.env.FRONTEND_ORIGIN_WWW,    // https://www.klintehuse.dk
+  'http://localhost:3000',            // keep for local dev (optional)
+].filter(Boolean);
+
 app.use(cors({
-  origin: FRONTEND_ORIGIN,
-  credentials: true
+  origin(origin, cb) {
+    // allow non-browser tools with no Origin (curl/Postman)
+    if (!origin) return cb(null, true);
+    if (allowlist.includes(origin)) return cb(null, true);
+    return cb(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
 }));
 
-// healt check pings
+// health check pings
 app.get('/health', (req, res) => {
     res.json({ status: "server is alive :)"});
 });
