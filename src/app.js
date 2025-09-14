@@ -22,7 +22,7 @@ const allowlist = [
   'http://localhost:3000',            // keep for local dev (optional)
 ].filter(Boolean);
 
-app.use(cors({
+/* app.use(cors({
   origin(origin, cb) {
     // allow non-browser tools with no Origin (curl/Postman)
     if (!origin) return cb(null, true);
@@ -30,9 +30,10 @@ app.use(cors({
     return cb(new Error('Not allowed by CORS'));
   },
   credentials: true,
-}));
+})); */
+app.use(cors());
 
-// health check pings
+// healt check pings
 app.get('/health', (req, res) => {
     res.json({ status: "server is alive :)"});
 });
