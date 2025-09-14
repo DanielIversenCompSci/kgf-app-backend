@@ -27,12 +27,18 @@ const pool = require('../config/database');
  */
 router.post('/', async (req, res) => {
   try {
-    const { email } = req.body || {};
-    // No validation/auth by design; store given email and current date
-    await pool.query(
-      'INSERT INTO newsletter_store (email, created_at) VALUES ($1, CURRENT_DATE)',
-      [email || null]
+    const raw = (req.body && req.body.email) || '';
+    const email = raw.trim();
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const result = await pool.query(
+      'INSERT INTO newsletter_store (email, created_at) VALUES ($1, CURRENT_DATE) ON CONFLICT (email) DO NOTHING RETURNING email',
+      [email]
     );
+
+    if (result.rowCount === 0) {
+      return res.status(200).json({ message: 'Already subscribed' });
+    }
     res.status(201).json({ message: 'Subscribed' });
   } catch (error) {
     console.error('HTTP POST /api/newsletter error:', error);
