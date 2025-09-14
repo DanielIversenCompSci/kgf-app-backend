@@ -1,20 +1,23 @@
 // db/pool.js
 const path = require('path');
-// ensure we load the .env in case entry file is not at project root
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
-
 const { Pool } = require('pg');
+
+// Always force .env to load, overriding anything PM2 or shell set
+require('dotenv').config({
+  path: path.join(__dirname, '..', '.env'), // adjust if pool.js is in /src/db/
+  override: true,
+});
 
 // Prefer DATABASE_URL if present; otherwise use individual vars.
 const config = process.env.DATABASE_URL
   ? { connectionString: process.env.DATABASE_URL }
   : {
       host: process.env.DB_HOST || 'localhost',
-      port: Number(process.env.DB_PORT || 5432), // <- ensure number
+      port: Number(process.env.DB_PORT || 5432),
       database: process.env.DB_NAME,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      // ssl: false, // keep disabled for local Postgres on the VPS
+      // ssl: false, // keep disabled for local Postgres
     };
 
 // One-time visibility to confirm env is loaded
@@ -28,7 +31,7 @@ console.log('DB config snapshot:', {
 
 const pool = new Pool(config);
 
-// Helpful: surface idle client errors in logs
+// Helpful: log idle client errors
 pool.on('error', (err) => {
   console.error('Unexpected pg pool error:', err);
 });
