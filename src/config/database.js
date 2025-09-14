@@ -1,14 +1,20 @@
-// db/pool.js
-const path = require('path');
+// src/db/pool.js (adjust the path if your file lives elsewhere)
 const { Pool } = require('pg');
+const path = require('path');
+const fs = require('fs');
 
-// Always force .env to load, overriding anything PM2 or shell set
+// ABSOLUTE path is the safest under PM2
+const ENV_PATH = '/var/www/kgfapi/.env';
+
+console.log('Loading .env from:', ENV_PATH, 'exists?', fs.existsSync(ENV_PATH));
+
 require('dotenv').config({
-  path: path.join(__dirname, '..', '.env'), // adjust if pool.js is in /src/db/
+  path: ENV_PATH,
   override: true,
+  // quiet: true, // optional
 });
 
-// Prefer DATABASE_URL if present; otherwise use individual vars.
+// Prefer DATABASE_URL if present; otherwise DB_*
 const config = process.env.DATABASE_URL
   ? { connectionString: process.env.DATABASE_URL }
   : {
@@ -17,10 +23,8 @@ const config = process.env.DATABASE_URL
       database: process.env.DB_NAME,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      // ssl: false, // keep disabled for local Postgres
     };
 
-// One-time visibility to confirm env is loaded
 console.log('DB config snapshot:', {
   via: process.env.DATABASE_URL ? 'DATABASE_URL' : 'DB_*',
   host: config.host || '(from URL)',
@@ -30,10 +34,6 @@ console.log('DB config snapshot:', {
 });
 
 const pool = new Pool(config);
-
-// Helpful: log idle client errors
-pool.on('error', (err) => {
-  console.error('Unexpected pg pool error:', err);
-});
+pool.on('error', (err) => console.error('Unexpected pg pool error:', err));
 
 module.exports = pool;
